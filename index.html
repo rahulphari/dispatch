@@ -29,7 +29,7 @@
             --text-secondary: #8b949e;
             --font-main: 'Roboto', sans-serif;
         }
-        html { font-size: 16px; }
+        html { font-size: 16px; transition: font-size 0.2s ease-in-out; }
         body {
             font-family: var(--font-main);
             background-color: var(--bg-deep-space);
@@ -159,6 +159,29 @@
             border-color: var(--accent-blue); font-weight: 500;
         }
         .filter-label:hover { border-color: var(--text-secondary); }
+
+        /* --- Accessibility Controls --- */
+        .font-controls button {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .font-controls button:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* --- Table Scroll --- */
+        .table-container {
+            height: 350px; /* Approx 10 rows */
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -170,14 +193,23 @@
         <div id="loading-indicator" class="hidden mt-8 text-center"><svg class="animate-spin h-8 w-8 text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-gray-400">Analyzing data stream...</p></div>
         <p id="error-message" class="hidden mt-4 text-red-400 font-semibold"></p>
         <button id="action-button" class="action-button text-white font-bold py-3 px-6 rounded-lg mt-8 text-center"><span class="block text-lg"><i data-lucide="bar-chart-2" class="inline-block h-5 w-5 mr-2"></i>DISPATCH-SIGHT: Load & Analyze</span><span class="block text-xs font-normal opacity-75">Process & Visualize Shipment Data</span></button>
-        <footer class="footer-text text-center text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Dispatch Operations - Hubli (for internal use only)</p></footer>
+        <footer class="footer-text text-center text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Team Sonic - Hubli (for internal use only)</p></footer>
     </div>
 
     <!-- Screen: Dashboard -->
     <div id="dashboard-screen" class="hidden p-4 md:p-6 transition-opacity duration-500 opacity-0 flex flex-col h-screen max-h-screen">
         <header class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 pb-4 border-b border-gray-800">
             <div><h1 class="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">DISPATCH-SIGHT</h1><p class="text-gray-400 text-sm" id="dashboard-subtitle"></p></div>
-            <div class="text-right mt-4 md:mt-0"><div id="live-clock" class="text-3xl font-bold text-gray-200"></div><p class="text-xs text-gray-500">Hubli, Karnataka (IST)</p></div>
+            <div class="flex items-center gap-6">
+                <div class="font-controls flex items-center gap-2">
+                    <button id="font-decrease" title="Decrease font size"><i data-lucide="zoom-out" class="h-5 w-5"></i></button>
+                    <button id="font-increase" title="Increase font size"><i data-lucide="zoom-in" class="h-5 w-5"></i></button>
+                </div>
+                <div class="text-right">
+                    <div id="live-time" class="text-3xl font-bold text-gray-200"></div>
+                    <div id="live-date" class="text-xs text-gray-500 text-right"></div>
+                </div>
+            </div>
         </header>
 
         <main class="grid grid-rows-[auto_auto_1fr] grid-cols-1 lg:grid-cols-2 gap-4 flex-grow overflow-hidden">
@@ -188,8 +220,8 @@
                 <div id="status-spectrum-container" class="w-full"></div>
             </section>
 
-            <section class="dashboard-panel"><h3 class="panel-title">All Clients</h3><div id="client-filters" class="filter-container"></div><input type="text" id="client-search" class="search-box" placeholder="Magic search for clients..."><div class="overflow-y-auto flex-grow"><table id="client-breakdown-table" class="w-full text-left"></table></div></section>
-            <section class="dashboard-panel"><h3 class="panel-title">All Localities</h3><div id="locality-filters" class="filter-container"></div><input type="text" id="locality-search" class="search-box" placeholder="Magic search for localities..."><div class="overflow-y-auto flex-grow"><table id="locality-breakdown-table" class="w-full text-left"></table></div></section>
+            <section class="dashboard-panel"><h3 class="panel-title">All Clients</h3><div id="client-filters" class="filter-container"></div><input type="text" id="client-search" class="search-box" placeholder="Magic search for clients..."><div class="table-container"><table id="client-breakdown-table" class="w-full text-left"></table></div></section>
+            <section class="dashboard-panel"><h3 class="panel-title">All Localities</h3><div id="locality-filters" class="filter-container"></div><input type="text" id="locality-search" class="search-box" placeholder="Magic search for localities..."><div class="table-container"><table id="locality-breakdown-table" class="w-full text-left"></table></div></section>
             
             <section class="dashboard-panel col-span-1 lg:col-span-2">
                  <h3 class="panel-title">Geo-Matrix: Shipment Density</h3>
@@ -197,7 +229,7 @@
             </section>
         </main>
         
-        <footer class="flex-shrink-0 text-center mt-4 pt-4 border-t border-gray-800 text-gray-600 text-xs"><p>Designed & Crafted by Rh. | for ⚡ Team Sonic - Hubli (for internal use only)</p></footer>
+        <footer class="flex-shrink-0 text-center mt-4 pt-4 border-t border-gray-800 text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Dispatch Operations - Hubli (for internal use only)</p></footer>
     </div>
     
     <!-- Modal: Drill-Down Inspector -->
@@ -207,14 +239,15 @@
         // --- Embedded Leaflet.js v1.9.4 & Leaflet.heat v0.2.0 for Offline Use ---
         !function(t,i){"object"==typeof exports&&"undefined"!=typeof module?i(exports):"function"==typeof define&&define.amd?define(["exports"],i):i((t=t||self).L={})}(this,function(t){"use strict";function i(t){var i,e,n,o;for(e=1,n=arguments.length;e<n;e++)for(i in o=arguments[e])t[i]=o[i];return t}var e=Object.create||function(){function t(){}return function(i){return t.prototype=i,new t}}();t.version="1.9.4";/*...many lines of minified code...*/}); "use strict";!function(t){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).L=t()}}(function(){return function t(e,i,a){function s(r,h){if(!i[r]){if(!e[r]){var l="function"==typeof require&&require;if(!h&&l)return l(r,!0);if(o)return o(r,!0);var n=new Error("Cannot find module '"+r+"'");throw n.code="MODULE_NOT_FOUND",n}var d=i[r]={exports:{}};e[r][0].call(d.exports,function(t){var i=e[r][1][t];return s(i?i:t)},d,d.exports,t,e,i,a)}return i[r].exports}for(var o="function"==typeof require&&require,r=0;r<a.length;r++)s(a[r]);return s}({1:[function(t,e,i){L.HeatLayer=(L.Layer?L.Layer:L.Class).extend({initialize:function(t,e){this._latlngs=t,L.setOptions(this,e)},setLatLngs:function(t){return this._latlngs=t,this.redraw()},addLatLng:function(t){return this._latlngs.push(t),this.redraw()}}),L.heatLayer=function(t,e){return new L.HeatLayer(t,e)}},{}]},{},[1])(1)});
     </script>
+    <script src="hubli_geojson.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     const DOM = {};
-    ['upload-screen', 'dashboard-screen', 'drop-zone', 'csv-file-input', 'loading-indicator', 'error-message', 'live-clock', 'dashboard-subtitle', 'modal-overlay', 'modal-content', 'modal-title', 'modal-close-btn', 'modal-table-body', 'insight-deck', 'client-breakdown-table', 'locality-breakdown-table', 'map-container', 'status-spectrum-container', 'client-search', 'locality-search', 'action-button', 'client-filters', 'locality-filters'].forEach(id => DOM[id] = document.getElementById(id));
+    ['upload-screen', 'dashboard-screen', 'drop-zone', 'csv-file-input', 'loading-indicator', 'error-message', 'live-time', 'live-date', 'dashboard-subtitle', 'modal-overlay', 'modal-content', 'modal-title', 'modal-close-btn', 'modal-table-body', 'insight-deck', 'client-breakdown-table', 'locality-breakdown-table', 'map-container', 'status-spectrum-container', 'client-search', 'locality-search', 'action-button', 'client-filters', 'locality-filters', 'font-increase', 'font-decrease'].forEach(id => DOM[id] = document.getElementById(id));
     
-    let state = { fullData: [], map: null, currentModalData: [], sortState: {}, aggregatedClients: [], aggregatedLocalities: [], clientFilter: 'All', localityFilter: 'All' };
+    let state = { fullData: [], map: null, currentModalData: [], sortState: {}, aggregatedClients: [], aggregatedLocalities: [], clientFilter: 'All', localityFilter: 'All', currentFontSize: 16 };
     
     const setupEventListeners = () => {
         DOM['action-button'].addEventListener('click', () => DOM['csv-file-input'].click());
@@ -238,6 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM['status-spectrum-container'].addEventListener('click', handleSpectrumClick);
         DOM['client-filters'].addEventListener('change', handleFilterChange);
         DOM['locality-filters'].addEventListener('change', handleFilterChange);
+        DOM['font-increase'].addEventListener('click', () => updateFontSize(1));
+        DOM['font-decrease'].addEventListener('click', () => updateFontSize(-1));
     };
 
     const handleFile = (file) => {
@@ -380,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const max = localityData.length > 0 ? Math.max(...localityData.map(l => l[1].total)) : 1;
         const rows = localityData.map(([name, counts]) => {
             const parts = name.split(' - ');
-            const loc = parts[0];
+            const loc = parts[0] || 'Not Available';
             const pin = parts.slice(1).join(' - ');
             return [loc, pin, counts['B2C']||0, counts['B2B']||0, counts['HEAVY']||0, counts.total, name];
         });
@@ -412,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const filtered = state.aggregatedClients.filter(([name]) => name.toLowerCase().includes(searchTerm));
             renderClientTable(filtered);
         } else {
-            const filtered = state.aggregatedLocalities.filter(([name]) => name.toLowerCase().includes(searchTerm));
+            const filtered = state.aggregatedLocalities.filter(([name]) => name.toLowerCase().includes(searchTerm) || (name.split(' - ')[1] && name.split(' - ')[1].includes(searchTerm)));
             renderLocalityTable(filtered);
         }
     }
@@ -460,10 +495,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if(state.map) { state.map.remove(); state.map = null; }
         state.map = L.map('map-container', { zoomControl: false }).setView([15.3647, 75.1240], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB' }).addTo(state.map);
+        
+        if (typeof hubliGeoJsonData !== 'undefined') {
+            L.geoJSON(hubliGeoJsonData, {
+                style: () => ({ color: "#58a6ff", weight: 1, opacity: 0.6, fillColor: "#58a6ff", fillOpacity: 0.1 })
+            }).bindTooltip(layer => layer.feature.properties.name).addTo(state.map);
+        }
+
         const heatPoints = data.filter(r => r.uan_lat && r.uan_long).map(r => [r.uan_lat, r.uan_long, 0.5]);
         if (heatPoints.length > 0) {
             L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 18, gradient: {0.4: '#2563eb', 0.65: '#38bdf8', 1: '#a78bfa'} }).addTo(state.map);
         }
+    }
+    
+    function updateFontSize(change) {
+        const newSize = Math.max(12, Math.min(20, state.currentFontSize + change));
+        state.currentFontSize = newSize;
+        document.documentElement.style.fontSize = newSize + 'px';
     }
 
     function showError(msg) { DOM['error-message'].textContent = msg; DOM['error-message'].classList.toggle('hidden', !msg); }
@@ -481,8 +529,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
     
+    const clockInterval = setInterval(() => {
+        const now = new Date();
+        DOM['live-time'].textContent = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        DOM['live-date'].textContent = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'long', year: 'numeric' });
+    }, 1000);
+
     setupEventListeners();
-    setInterval(() => { DOM['live-clock'].textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia-Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }); }, 1000);
 });
 </script>
 
