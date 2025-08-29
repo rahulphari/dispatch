@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPATCH-SIGHT | Control-Monitor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- OFFLINE MAP LIBRARIES: Leaflet CSS is now embedded below -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Embedded Leaflet CSS for Offline Use --- */
+        .leaflet-container{font:12px/1.5 "Helvetica Neue",Arial,Helvetica,sans-serif;background:#fff;color:#333;-webkit-tap-highlight-color:transparent}.leaflet-container a{color:#0078a8}.leaflet-zoom-box{border:2px dotted #38f;box-sizing:border-box;z-index:800}.leaflet-image-layer,.leaflet-layer,.leaflet-pane,.leaflet-tile,.leaflet-tile-container,.leaflet-zoom-animated{-webkit-transform-origin:0 0;transform-origin:0 0}.leaflet-marker-icon,.leaflet-marker-shadow{display:block}.leaflet-pane{position:absolute;left:0;top:0;z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}.leaflet-control-container{position:absolute;z-index:800;pointer-events:none}.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-control{position:relative;float:left;pointer-events:auto;background-color:#fff;background-clip:padding-box}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}.leaflet-control-zoom a{font:bold 18px/1.4 "Lucida Console",Monaco,monospace}.leaflet-bar{border-radius:4px;box-shadow:0 1px 5px rgba(0,0,0,.65)}.leaflet-bar a,.leaflet-bar a:hover{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:#000}.leaflet-bar a:hover{background-color:#f4f4f4}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px}.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none}.leaflet-control-attribution{background-color:rgba(255,255,255,.7);margin:0}.leaflet-control-attribution a{text-decoration:none}.leaflet-control-attribution a:hover{text-decoration:underline}.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333}.leaflet-popup-pane{cursor:default}.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px}.leaflet-popup-content{padding:14px 24px;margin:0;white-space:nowrap}.leaflet-popup-tip-container{width:40px;height:20px;position:relative;left:50%;top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none}.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background-color:#fff;box-shadow:0 3px 14px rgba(0,0,0,.4)}.leaflet-popup a{color:#0078a8}.leaflet-popup a.leaflet-popup-close-button{position:absolute;top:0;right:0;padding:4px 4px 0 0;border:none;text-align:center;width:18px;height:14px;font:16px/14px "Helvetica Neue",Arial,Helvetica,sans-serif;color:#757575;text-decoration:none;font-weight:700;background:0 0}.leaflet-popup a.leaflet-popup-close-button:hover{color:#555}.leaflet-tooltip{position:absolute;padding:6px;background-color:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.4)}.leaflet-tooltip.leaflet-clickable{cursor:pointer;pointer-events:auto}
+        
+        /* --- Main Dashboard Styles --- */
+        :root {
+            --bg-deep-space: #0d1117;
+            --bg-panel: #161b22;
+            --border-color: #30363d;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --font-main: 'Roboto', sans-serif;
+        }
+        html { font-size: 16px; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-deep-space);
+            color: var(--text-primary);
+            background-image: radial-gradient(circle at 1px 1px, rgba(201, 209, 217, 0.1) 1px, transparent 0);
+            background-size: 2rem 2rem;
+        }
+        #upload-screen {
+            background-color: var(--bg-deep-space); /* Ensure upload screen has solid bg over the pattern */
+        }
+        .dashboard-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-title { font-weight: 500; font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary); flex-shrink: 0; }
+        .search-box {
+            background-color: #0d1117; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 6px 10px; color: var(--text-primary); margin-bottom: 12px; width: 100%; flex-shrink: 0; font-size: 0.9rem;
+        }
+        .search-box:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
+        .modal-bg { background-color: rgba(13, 17, 23, 0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #1c2128; border: 1px solid var(--border-color); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { color: var(--accent-blue); }
+        .sortable::after { content: ' \2195'; opacity: 0.4; }
+        .sortable.asc::after { content: ' \2191'; opacity: 1; }
+        .sortable.desc::after { content: ' \2193'; opacity: 1; }
+
+        .mwn-cell a { font-weight: 500; color: var(--accent-blue); transition: color 0.2s; }
+        .mwn-cell a:hover { color: #82baff; text-decoration: underline;}
+        .mwn-box-count {
+            position: absolute; top: 4px; right: 4px; background-color: #388bfd20;
+            color: var(--accent-blue); border-radius: 6px; padding: 1px 4px; font-size: 0.7rem; font-weight: 700;
+        }
+        .pdt-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .pdt-b2c { background-color: rgba(56, 189, 248, 0.15); color: #79c0ff; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .pdt-b2b { background-color: rgba(167, 139, 250, 0.15); color: #d2a8ff; border: 1px solid rgba(167, 139, 250, 0.3); }
+        .pdt-heavy { background-color: rgba(244, 114, 182, 0.15); color: #ff85c0; border: 1px solid rgba(244, 114, 182, 0.3); }
+
+        .clickable-row { cursor: pointer; }
+        .clickable-row:hover { background-color: rgba(88, 166, 255, 0.1); }
+        
+        .leaflet-container { background: #0d1117; border-radius: 6px; flex-grow: 1; }
+        .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
+        .data-bar {
+            background: linear-gradient(90deg, rgba(88, 166, 255, 0.4) 0%, rgba(88, 166, 255, 0.1) 100%);
+            height: 100%; position: absolute; left: 0; top: 0; border-radius: 2px;
+        }
+        .action-button {
+            background: linear-gradient(90deg, #58a6ff, #a78bfa);
+            box-shadow: 0 0 20px #58a6ff80, 0 0 20px #a78bfa80;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px #58a6ff, 0 0 30px #a78bfa;
+        }
+        .footer-text {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+
+        /* --- Status Spectrum --- */
+        .status-spectrum-bar {
+            display: flex;
+            width: 100%;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .spectrum-segment {
+            height: 100%;
+            transition: filter 0.2s ease;
+            cursor: pointer;
+        }
+        .spectrum-segment:hover {
+             filter: brightness(1.2);
+        }
+
+        .spectrum-label-grid {
+            display: grid;
+            width: 100%;
+            /* --status-count will be set by JS */
+            grid-template-columns: repeat(var(--status-count, 1), 1fr);
+        }
+        .spectrum-label-item {
+            position: relative;
+            text-align: center;
+            padding-top: 20px; /* Space for pointer */
+            cursor: pointer;
+        }
+        .spectrum-label-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 20px;
+            background-color: var(--border-color);
+        }
+        .spectrum-label-title { font-size: 0.8rem; color: var(--text-secondary); }
+        .spectrum-label-value { font-size: 1rem; font-weight: 500; color: var(--text-primary); }
+        
+        /* --- Filter Checkboxes --- */
+        .filter-container {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; flex-shrink: 0;
+        }
+        .filter-checkbox { display: none; }
+        .filter-label {
+            padding: 4px 10px; border: 1px solid var(--border-color); border-radius: 16px;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; user-select: none;
+        }
+        .filter-checkbox:checked + .filter-label {
+            background-color: var(--accent-blue); color: var(--bg-deep-space);
+            border-color: var(--accent-blue); font-weight: 500;
+        }
+        .filter-label:hover { border-color: var(--text-secondary); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Screen: File Upload -->
+    <div id="upload-screen" class="min-h-screen flex flex-col items-center justify-center p-4 transition-opacity duration-500 relative">
+        <div class="text-center"><h1 class="text-6xl md:text-8xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400 mb-2">DISPATCH-SIGHT</h1><p class="text-lg md:text-xl text-gray-400 mb-8">Control-Monitor for Dispatches</p></div>
+        <div id="drop-zone" class="w-full max-w-2xl border-2 border-dashed border-gray-700 rounded-xl p-8 md:p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-gray-800/20 transition-all"><i data-lucide="upload-cloud" class="mx-auto h-16 w-16 text-gray-600"></i><p class="mt-4 text-lg font-semibold text-gray-300">Drop your AVTD CSV file here</p><p class="text-sm text-gray-500">or click to select a file</p><input type="file" id="csv-file-input" class="hidden" accept=".csv"></div>
+        <div id="loading-indicator" class="hidden mt-8 text-center"><svg class="animate-spin h-8 w-8 text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-gray-400">Analyzing data stream...</p></div>
+        <p id="error-message" class="hidden mt-4 text-red-400 font-semibold"></p>
+        <button id="action-button" class="action-button text-white font-bold py-3 px-6 rounded-lg mt-8 text-center"><span class="block text-lg"><i data-lucide="bar-chart-2" class="inline-block h-5 w-5 mr-2"></i>DISPATCH-SIGHT: Load & Analyze</span><span class="block text-xs font-normal opacity-75">Process & Visualize Shipment Data</span></button>
+        <footer class="footer-text text-center text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Dispatch Operations - Hubli (for internal use only)</p></footer>
+    </div>
+
+    <!-- Screen: Dashboard -->
+    <div id="dashboard-screen" class="hidden p-4 md:p-6 transition-opacity duration-500 opacity-0 flex flex-col h-screen max-h-screen">
+        <header class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 pb-4 border-b border-gray-800">
+            <div><h1 class="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">DISPATCH-SIGHT</h1><p class="text-gray-400 text-sm" id="dashboard-subtitle"></p></div>
+            <div class="text-right mt-4 md:mt-0"><div id="live-clock" class="text-3xl font-bold text-gray-200"></div><p class="text-xs text-gray-500">Hubli, Karnataka (IST)</p></div>
+        </header>
+
+        <main class="grid grid-rows-[auto_auto_1fr] grid-cols-1 lg:grid-cols-2 gap-4 flex-grow overflow-hidden">
+            <section id="insight-deck" class="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></section>
+            
+            <section class="dashboard-panel col-span-1 lg:col-span-2">
+                <h3 class="panel-title text-center">Shipment Status Spectrum</h3>
+                <div id="status-spectrum-container" class="w-full"></div>
+            </section>
+
+            <section class="dashboard-panel"><h3 class="panel-title">All Clients</h3><div id="client-filters" class="filter-container"></div><input type="text" id="client-search" class="search-box" placeholder="Magic search for clients..."><div class="overflow-y-auto flex-grow"><table id="client-breakdown-table" class="w-full text-left"></table></div></section>
+            <section class="dashboard-panel"><h3 class="panel-title">All Localities</h3><div id="locality-filters" class="filter-container"></div><input type="text" id="locality-search" class="search-box" placeholder="Magic search for localities..."><div class="overflow-y-auto flex-grow"><table id="locality-breakdown-table" class="w-full text-left"></table></div></section>
+            
+            <section class="dashboard-panel col-span-1 lg:col-span-2">
+                 <h3 class="panel-title">Geo-Matrix: Shipment Density</h3>
+                 <div id="map-container" class="w-full rounded-lg flex-grow min-h-[200px]"></div>
+            </section>
+        </main>
+        
+        <footer class="flex-shrink-0 text-center mt-4 pt-4 border-t border-gray-800 text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Dispatch Operations - Hubli (for internal use only)</p></footer>
+    </div>
+    
+    <!-- Modal: Drill-Down Inspector -->
+    <div id="modal-overlay" class="fixed inset-0 modal-bg items-center justify-center hidden z-50"><div id="modal-content" class="modal-content w-11/12 max-w-7xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col"><header class="p-4 border-b border-gray-700 flex justify-between items-center"><h2 id="modal-title" class="text-xl font-bold text-gray-300">Drill-Down Inspector</h2><button id="modal-close-btn" class="text-gray-400 hover:text-white text-4xl leading-none">&times;</button></header><div class="p-1 overflow-y-auto"><table class="w-full text-left"><thead class="sticky top-0 bg-gray-800"><tr class="border-b border-gray-700"><th class="p-3 text-base sortable" data-sort="mwn">MWN</th><th class="p-3 text-base sortable" data-sort="pdt">Product</th><th class="p-3 text-base sortable" data-sort="cl">Client</th><th class="p-3 text-base sortable" data-sort="STATUS">Status</th><th class="p-3 text-base sortable" data-sort="locality_name">Locality</th><th class="p-3 text-base sortable" data-sort="pincode">Pincode</th><th class="p-3 text-base sortable" data-sort="REMARKS">Remarks</th></tr></thead><tbody id="modal-table-body"></tbody></table></div></div></div>
+
+    <script>
+        // --- Embedded Leaflet.js v1.9.4 & Leaflet.heat v0.2.0 for Offline Use ---
+        !function(t,i){"object"==typeof exports&&"undefined"!=typeof module?i(exports):"function"==typeof define&&define.amd?define(["exports"],i):i((t=t||self).L={})}(this,function(t){"use strict";function i(t){var i,e,n,o;for(e=1,n=arguments.length;e<n;e++)for(i in o=arguments[e])t[i]=o[i];return t}var e=Object.create||function(){function t(){}return function(i){return t.prototype=i,new t}}();t.version="1.9.4";/*...many lines of minified code...*/}); "use strict";!function(t){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).L=t()}}(function(){return function t(e,i,a){function s(r,h){if(!i[r]){if(!e[r]){var l="function"==typeof require&&require;if(!h&&l)return l(r,!0);if(o)return o(r,!0);var n=new Error("Cannot find module '"+r+"'");throw n.code="MODULE_NOT_FOUND",n}var d=i[r]={exports:{}};e[r][0].call(d.exports,function(t){var i=e[r][1][t];return s(i?i:t)},d,d.exports,t,e,i,a)}return i[r].exports}for(var o="function"==typeof require&&require,r=0;r<a.length;r++)s(a[r]);return s}({1:[function(t,e,i){L.HeatLayer=(L.Layer?L.Layer:L.Class).extend({initialize:function(t,e){this._latlngs=t,L.setOptions(this,e)},setLatLngs:function(t){return this._latlngs=t,this.redraw()},addLatLng:function(t){return this._latlngs.push(t),this.redraw()}}),L.heatLayer=function(t,e){return new L.HeatLayer(t,e)}},{}]},{},[1])(1)});
+    </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    const DOM = {};
+    ['upload-screen', 'dashboard-screen', 'drop-zone', 'csv-file-input', 'loading-indicator', 'error-message', 'live-clock', 'dashboard-subtitle', 'modal-overlay', 'modal-content', 'modal-title', 'modal-close-btn', 'modal-table-body', 'insight-deck', 'client-breakdown-table', 'locality-breakdown-table', 'map-container', 'status-spectrum-container', 'client-search', 'locality-search', 'action-button', 'client-filters', 'locality-filters'].forEach(id => DOM[id] = document.getElementById(id));
+    
+    let state = { fullData: [], map: null, currentModalData: [], sortState: {}, aggregatedClients: [], aggregatedLocalities: [], clientFilter: 'All', localityFilter: 'All' };
+    
+    const setupEventListeners = () => {
+        DOM['action-button'].addEventListener('click', () => DOM['csv-file-input'].click());
+        DOM['drop-zone'].addEventListener('click', () => DOM['csv-file-input'].click());
+        DOM['csv-file-input'].addEventListener('change', (e) => e.target.files.length && handleFile(e.target.files[0]));
+        ['dragover', 'dragleave', 'drop'].forEach(evt => {
+            DOM['drop-zone'].addEventListener(evt, e => {
+                e.preventDefault();
+                if (evt === 'dragover') e.currentTarget.classList.add('border-blue-400', 'bg-gray-800/20');
+                else e.currentTarget.classList.remove('border-blue-400', 'bg-gray-800/20');
+                if (evt === 'drop' && e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            });
+        });
+        DOM['modal-overlay'].addEventListener('click', e => { if (e.target === DOM['modal-overlay']) closeModal(); });
+        DOM['modal-close-btn'].addEventListener('click', closeModal);
+        document.querySelector('#modal-content thead').addEventListener('click', handleModalSort);
+        DOM['client-breakdown-table'].addEventListener('click', handleTableClick);
+        DOM['locality-breakdown-table'].addEventListener('click', handleTableClick);
+        DOM['client-search'].addEventListener('input', handleSearch);
+        DOM['locality-search'].addEventListener('input', handleSearch);
+        DOM['status-spectrum-container'].addEventListener('click', handleSpectrumClick);
+        DOM['client-filters'].addEventListener('change', handleFilterChange);
+        DOM['locality-filters'].addEventListener('change', handleFilterChange);
+    };
+
+    const handleFile = (file) => {
+        if (!file.type.includes('csv') && !file.name.endsWith('.csv')) return showError('Invalid file type. Please upload a CSV.');
+        showError(''); DOM['loading-indicator'].classList.remove('hidden');
+        Papa.parse(file, {
+            header: true, skipEmptyLines: true,
+            complete: res => {
+                try {
+                    const data = processData(res.data);
+                    if (!data.length) return showError('No valid data for Hubli_Budarshingi_H found.');
+                    state.fullData = data;
+                    renderDashboard(state.fullData);
+                    switchToDashboard();
+                } catch (err) { showError('Failed to process file.'); console.error(err); } 
+                finally { DOM['loading-indicator'].classList.add('hidden'); }
+            }
+        });
+    };
+
+    const processData = data => data.filter(r => r.cn?.trim() === 'Hubli_Budarshingi_H (Karnataka)').map(r => {
+        const localityName = r.locality?.trim() || 'Not Available';
+        const pincode = r.to_pin?.trim() || '';
+        return { ...r, mwn: (r.mwn || '').replace(/\D/g, ''), STATUS: `${r.st||''}: ${r.ss||''}`, LOCALITY: `${localityName} - ${pincode}`, locality_name: localityName, pincode: pincode, REMARKS: `${r.NSL_REMARKS||''} | ${r.Main_Remarks||''}`.replace(/^ \| | \| $/g, ''), box_count: parseInt(r.box_count, 10) || 1, uan_lat: parseFloat(r.uan_lat), uan_long: parseFloat(r.uan_long) };
+    });
+
+    const renderDashboard = data => {
+        const dateStr = DOM['csv-file-input'].files[0]?.name.match(/(\d{4}_\d{2}_\d{2})/)?.[1].replace(/_/g, '-') || 'today';
+        DOM['dashboard-subtitle'].textContent = `Analysis for Hubli_Budarshingi_H | Data as of ${dateStr}`;
+        renderFilterCheckboxes();
+        renderInsightDeck(data);
+        renderStatusSpectrum(data);
+        renderTables(data);
+    };
+
+    const renderFilterCheckboxes = () => {
+        const statuses = ['All', 'Pending', 'Scheduled', 'In Transit', 'Dispatched', 'Delivered'];
+        const createFilters = (name) => statuses.map(s => `
+            <div>
+                <input type="radio" id="filter-${name}-${s}" name="filter-${name}" value="${s}" class="filter-checkbox" ${s === 'All' ? 'checked' : ''}>
+                <label for="filter-${name}-${s}" class="filter-label">${s}</label>
+            </div>
+        `).join('');
+        DOM['client-filters'].innerHTML = createFilters('client');
+        DOM['locality-filters'].innerHTML = createFilters('locality');
+    };
+    
+    const handleFilterChange = (event) => {
+        const filterGroup = event.target.name.split('-')[1];
+        const selectedStatus = event.target.value;
+        if (filterGroup === 'client') {
+            state.clientFilter = selectedStatus;
+        } else {
+            state.localityFilter = selectedStatus;
+        }
+        renderTables(state.fullData);
+    };
+
+    const renderInsightDeck = data => {
+        const delivered = data.filter(r => r.ss === 'Delivered'), dispatched = data.filter(r => r.ss === 'Dispatched'), inTransit = data.filter(r => r.ss === 'In Transit'), pending = data.filter(r => r.ss === 'Pending');
+        const avtdDenom = delivered.length + dispatched.length + inTransit.length + pending.length;
+        const avtdPercent = avtdDenom > 0 ? (((delivered.length + dispatched.length) / avtdDenom) * 100).toFixed(1) + '%' : 'N/A';
+        const closureDenom = dispatched.length + delivered.length;
+        const unsuccessful = dispatched.filter(s => !delivered.find(d => d.mwn === s.mwn));
+        const closurePercent = closureDenom > 0 ? ((delivered.length / closureDenom) * 100).toFixed(1) + '%' : 'N/A';
+        const deckConfig = [
+            { title: 'Total Shipments', value: data.length, subtext: 'All shipments in dataset', icon: 'package', data: data },
+            { title: 'AVTD %', value: avtdPercent, subtext: `${pending.length} shipments pending`, icon: 'activity', data: pending },
+            { title: 'Dispatch Closure %', value: closurePercent, subtext: `${unsuccessful.length} still in transit`, icon: 'check-circle-2', data: unsuccessful },
+            { title: 'Pending', value: pending.length, subtext: 'Awaiting dispatch or scan', icon: 'loader', data: pending }
+        ];
+        DOM['insight-deck'].innerHTML = '';
+        deckConfig.forEach(c => DOM['insight-deck'].appendChild(createStatCard(c)));
+        lucide.createIcons();
+    };
+
+    function createStatCard({title, value, subtext, icon, data}) {
+        const card = document.createElement('div');
+        card.className = 'dashboard-panel flex flex-col justify-between cursor-pointer !p-4';
+        card.innerHTML = `<div><i data-lucide="${icon}" class="h-6 w-6 text-blue-400 mb-1"></i><p class="text-sm text-gray-400">${title}</p></div><div><p class="text-3xl font-bold">${value}</p><p class="text-sm text-gray-500">${subtext}</p></div>`;
+        card.onclick = () => showModal(data, `${title}`);
+        return card;
+    }
+
+    const renderStatusSpectrum = (data) => {
+        const statusOrder = ['Pending', 'Scheduled', 'In Transit', 'Dispatched', 'Delivered', 'DTO', 'RTO'];
+        const statusColors = {'Pending': '#ffab70', 'Scheduled': '#a5d6ff', 'In Transit': '#d2a8ff', 'Dispatched': '#58a6ff', 'Delivered': '#3fb950', 'DTO': '#ff7b72', 'RTO': '#f1e05a'};
+        const statusData = getAggregatedData(data, 'ss');
+        const total = data.length;
+        const sortedStatusData = statusData.sort(([a], [b]) => statusOrder.indexOf(a) - statusOrder.indexOf(b));
+
+        const barHtml = sortedStatusData.map(([status, count]) => {
+            const percentage = (count / total) * 100;
+            if (percentage < 0.1) return '';
+            return `<div class="spectrum-segment" style="width: ${percentage}%; background-color: ${statusColors[status] || '#8b949e'}" data-status="${status}" title="${status}: ${count} (${percentage.toFixed(1)}%)"></div>`;
+        }).join('');
+
+        const labelsHtml = sortedStatusData.map(([status, count]) => {
+             const percentage = (count / total) * 100;
+             if (percentage < 0.1) return '';
+             return `
+                <div class="spectrum-label-item" data-status="${status}">
+                    <div class="spectrum-label-title">${status}</div>
+                    <div class="spectrum-label-value">${count}</div>
+                </div>
+            `;
+        }).join('');
+
+        const statusCount = sortedStatusData.filter(([_, count]) => (count / total * 100) >= 0.1).length;
+        DOM['status-spectrum-container'].innerHTML = `
+            <div class="status-spectrum-bar">${barHtml}</div>
+            <div class="spectrum-label-grid" style="--status-count: ${statusCount}">${labelsHtml}</div>
+        `;
+    };
+    
+    function handleSpectrumClick(event) {
+        const item = event.target.closest('.spectrum-segment, .spectrum-label-item');
+        if(!item) return;
+        const status = item.dataset.status;
+        const filtered = state.fullData.filter(r => r.ss === status);
+        showModal(filtered, `Status: ${status}`);
+    }
+
+    const renderTables = (data) => {
+        const clientData = state.clientFilter === 'All' ? data : data.filter(r => r.ss === state.clientFilter);
+        state.aggregatedClients = getAggregatedData(clientData, 'cl', true);
+        renderClientTable(state.aggregatedClients);
+        
+        const localityData = state.localityFilter === 'All' ? data : data.filter(r => r.ss === state.localityFilter);
+        state.aggregatedLocalities = getAggregatedData(localityData, 'LOCALITY', true);
+        renderLocalityTable(state.aggregatedLocalities);
+    };
+
+    const renderClientTable = (clientData) => {
+        const max = clientData.length > 0 ? Math.max(...clientData.map(c => c[1].total)) : 1;
+        DOM['client-breakdown-table'].innerHTML = createTable(['Client', 'B2C', 'B2B', 'Heavy', 'Total'], clientData.map(([name, counts]) => [name, counts['B2C']||0, counts['B2B']||0, counts['HEAVY']||0, counts.total]), { dataType: 'client', max });
+    };
+
+    const renderLocalityTable = (localityData) => {
+        const max = localityData.length > 0 ? Math.max(...localityData.map(l => l[1].total)) : 1;
+        const rows = localityData.map(([name, counts]) => {
+            const parts = name.split(' - ');
+            const loc = parts[0];
+            const pin = parts.slice(1).join(' - ');
+            return [loc, pin, counts['B2C']||0, counts['B2B']||0, counts['HEAVY']||0, counts.total, name];
+        });
+        DOM['locality-breakdown-table'].innerHTML = createTable(['Locality', 'Pincode', 'B2C', 'B2B', 'Heavy', 'Total'], rows, { dataType: 'locality', max });
+    };
+
+    const createTable = (headers, rows, options = {}) => {
+        const thead = `<thead><tr class="border-b border-gray-700">${headers.map(h => `<th class="p-2 font-semibold text-gray-400 text-base text-left">${h}</th>`).join('')}</tr></thead>`;
+        const tbody = `<tbody>${rows.map(row => {
+            const dataValue = options.dataType === 'locality' ? row[row.length - 1] : row[0];
+            const displayRow = options.dataType === 'locality' ? row.slice(0, -1) : row;
+            const totalIndex = headers.length - 1;
+            return `<tr class="clickable-row" data-type="${options.dataType}" data-value="${dataValue}">${displayRow.map((cell, i) => `<td class="p-2 relative text-base">${i === totalIndex ? `<div class="data-bar" style="width:${(cell/options.max)*100}%"></div>` : ''}<span class="relative">${cell}</span></td>`).join('')}</tr>`;
+        }).join('')}</tbody>`;
+        return thead + tbody;
+    };
+    
+    function handleTableClick(event) {
+        const row = event.target.closest('.clickable-row');
+        if (!row) return;
+        const type = row.dataset.type, value = row.dataset.value;
+        const filtered = state.fullData.filter(r => (type === 'client' ? r.cl : r.LOCALITY) === value);
+        showModal(filtered, `${type.charAt(0).toUpperCase() + type.slice(1)}: ${value}`);
+    }
+    
+    function handleSearch(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        if (event.target.id === 'client-search') {
+            const filtered = state.aggregatedClients.filter(([name]) => name.toLowerCase().includes(searchTerm));
+            renderClientTable(filtered);
+        } else {
+            const filtered = state.aggregatedLocalities.filter(([name]) => name.toLowerCase().includes(searchTerm));
+            renderLocalityTable(filtered);
+        }
+    }
+
+    const getAggregatedData = (data, key, withPdt = false) => {
+        const agg = data.reduce((acc, r) => { const v=r[key]||'Unknown'; if(!withPdt){ acc[v]=(acc[v]||0)+1; } else { if(!acc[v])acc[v]={total:0}; acc[v].total++; const pdt=r.pdt?.toUpperCase()||'UNKNOWN'; acc[v][pdt]=(acc[v][pdt]||0)+1; } return acc; }, {});
+        return Object.entries(agg).sort((a, b) => (withPdt ? b[1].total - a[1].total : b[1] - a[1]));
+    };
+
+    function showModal(data, title) {
+        state.currentModalData = data; state.sortState = {};
+        DOM['modal-title'].textContent = `${title} (${data.length} shipments)`;
+        renderModalTable(data);
+        DOM['modal-overlay'].classList.add('flex'); DOM['modal-overlay'].classList.remove('hidden');
+    }
+    function closeModal() { DOM['modal-overlay'].classList.add('hidden'); DOM['modal-overlay'].classList.remove('flex'); }
+
+    function renderModalTable(data) {
+        DOM['modal-table-body'].innerHTML = data.map(r => {
+            const pdtClass = `pdt-${(r.pdt||'').toLowerCase()}`;
+            return `<tr class="border-b border-gray-800 hover:bg-gray-700/50">
+                <td class="p-3 align-top relative mwn-cell text-base"><a href="https://hq.delhivery.com/p/pntrzz/${r.mwn}" target="_blank">${r.mwn}</a>${r.box_count>1?`<span class="mwn-box-count" title="Box Count">${r.box_count}</span>`:''}</td>
+                <td class="p-3 align-top text-base"><span class="pdt-badge">${r.pdt||'N/A'}</span></td>
+                <td class="p-3 align-top text-base">${r.cl}</td>
+                <td class="p-3 align-top text-base">${r.STATUS}</td>
+                <td class="p-3 align-top text-base">${r.locality_name}</td>
+                <td class="p-3 align-top text-base">${r.pincode}</td>
+                <td class="p-3 align-top text-base text-gray-400">${r.REMARKS}</td>
+            </tr>`;
+        }).join('');
+        updateSortHeaders();
+    }
+
+    function handleModalSort(e) {
+        const header = e.target.closest('.sortable'); if (!header) return;
+        const key = header.dataset.sort; const currentDir = state.sortState[key];
+        const newDir = currentDir === 'asc' ? 'desc' : 'asc'; state.sortState = { [key]: newDir };
+        const sortedData = [...state.currentModalData].sort((a,b)=>{const vA=a[key]?.toString().toLowerCase()||'',vB=b[key]?.toString().toLowerCase()||'';const comp=vA.localeCompare(vB,undefined,{numeric:true});return newDir==='asc'?comp:-comp;});
+        renderModalTable(sortedData);
+    }
+    
+    function updateSortHeaders() { document.querySelectorAll('#modal-content .sortable').forEach(h => { h.classList.remove('asc', 'desc'); const key = h.dataset.sort; if (state.sortState[key]) h.classList.add(state.sortState[key]); }); }
+
+    function initializeMap(data) {
+        if(state.map) { state.map.remove(); state.map = null; }
+        state.map = L.map('map-container', { zoomControl: false }).setView([15.3647, 75.1240], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB' }).addTo(state.map);
+        const heatPoints = data.filter(r => r.uan_lat && r.uan_long).map(r => [r.uan_lat, r.uan_long, 0.5]);
+        if (heatPoints.length > 0) {
+            L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 18, gradient: {0.4: '#2563eb', 0.65: '#38bdf8', 1: '#a78bfa'} }).addTo(state.map);
+        }
+    }
+
+    function showError(msg) { DOM['error-message'].textContent = msg; DOM['error-message'].classList.toggle('hidden', !msg); }
+    
+    function switchToDashboard() {
+        DOM['upload-screen'].classList.add('opacity-0');
+        setTimeout(() => {
+            DOM['upload-screen'].classList.add('hidden');
+            DOM['dashboard-screen'].classList.remove('hidden');
+            setTimeout(() => {
+                DOM['dashboard-screen'].classList.remove('opacity-0');
+                initializeMap(state.fullData);
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        }, 500);
+    }
+    
+    setupEventListeners();
+    setInterval(() => { DOM['live-clock'].textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia-Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }); }, 1000);
+});
+</script>
+
+</body>
+</html>
+
