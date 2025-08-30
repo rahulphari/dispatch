@@ -103,85 +103,37 @@
         }
 
         /* --- Status Spectrum --- */
-        .status-spectrum-bar {
-            display: flex;
-            width: 100%;
-            height: 30px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        .spectrum-segment {
-            height: 100%;
-            transition: filter 0.2s ease;
-            cursor: pointer;
-        }
-        .spectrum-segment:hover {
-             filter: brightness(1.2);
-        }
-
-        .spectrum-label-grid {
-            display: grid;
-            width: 100%;
-            /* --status-count will be set by JS */
-            grid-template-columns: repeat(var(--status-count, 1), 1fr);
-        }
-        .spectrum-label-item {
-            position: relative;
-            text-align: center;
-            padding-top: 20px; /* Space for pointer */
-            cursor: pointer;
-        }
-        .spectrum-label-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 1px;
-            height: 20px;
-            background-color: var(--border-color);
-        }
+        .status-spectrum-bar { display: flex; width: 100%; height: 30px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+        .spectrum-segment { height: 100%; transition: filter 0.2s ease; cursor: pointer; }
+        .spectrum-segment:hover { filter: brightness(1.2); }
+        .spectrum-label-grid { display: grid; width: 100%; grid-template-columns: repeat(var(--status-count, 1), 1fr); }
+        .spectrum-label-item { position: relative; text-align: center; padding-top: 20px; cursor: pointer; }
+        .spectrum-label-item::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 1px; height: 20px; background-color: var(--border-color); }
         .spectrum-label-title { font-size: 0.8rem; color: var(--text-secondary); }
         .spectrum-label-value { font-size: 1rem; font-weight: 500; color: var(--text-primary); }
         
         /* --- Filter Checkboxes --- */
-        .filter-container {
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; flex-shrink: 0;
-        }
+        .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; flex-shrink: 0; }
         .filter-checkbox { display: none; }
-        .filter-label {
-            padding: 4px 10px; border: 1px solid var(--border-color); border-radius: 16px;
-            font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; user-select: none;
-        }
-        .filter-checkbox:checked + .filter-label {
-            background-color: var(--accent-blue); color: var(--bg-deep-space);
-            border-color: var(--accent-blue); font-weight: 500;
-        }
+        .filter-label { padding: 4px 10px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+        .filter-checkbox:checked + .filter-label { background-color: var(--accent-blue); color: var(--bg-deep-space); border-color: var(--accent-blue); font-weight: 500; }
         .filter-label:hover { border-color: var(--text-secondary); }
 
-        /* --- Accessibility Controls --- */
-        .font-controls button {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* --- Accessibility & Download Controls --- */
+        .font-controls button, .download-btn {
+            background-color: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-secondary);
+            height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            padding: 0 12px; font-size: 0.8rem;
         }
-        .font-controls button:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
+        .font-controls button { width: 32px; padding: 0; }
+        .font-controls button:hover, .download-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .download-options { display: none; position: absolute; background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; right: 0; top: 100%; margin-top: 4px; z-index: 60; }
+        .download-options a { display: block; padding: 8px 12px; white-space: nowrap; }
+        .download-options a:hover { background-color: rgba(88, 166, 255, 0.1); }
+        .relative:hover .download-options { display: block; }
 
         /* --- Table Scroll --- */
-        .table-container {
-            height: 350px; /* Approx 10 rows */
-            overflow-y: auto;
-        }
+        .table-container { height: 350px; overflow-y: auto; }
     </style>
 </head>
 <body class="antialiased">
@@ -193,7 +145,7 @@
         <div id="loading-indicator" class="hidden mt-8 text-center"><svg class="animate-spin h-8 w-8 text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-gray-400">Analyzing data stream...</p></div>
         <p id="error-message" class="hidden mt-4 text-red-400 font-semibold"></p>
         <button id="action-button" class="action-button text-white font-bold py-3 px-6 rounded-lg mt-8 text-center"><span class="block text-lg"><i data-lucide="bar-chart-2" class="inline-block h-5 w-5 mr-2"></i>DISPATCH-SIGHT: Load & Analyze</span><span class="block text-xs font-normal opacity-75">Process & Visualize Shipment Data</span></button>
-        <footer class="footer-text text-center text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Team Sonic - Hubli (for internal use only)</p></footer>
+        <footer class="footer-text text-center text-gray-600 text-xs"><p>Designed & Crafted by The Team | for ⚡️ Dispatch Operations - Hubli (for internal use only)</p></footer>
     </div>
 
     <!-- Screen: Dashboard -->
@@ -233,7 +185,25 @@
     </div>
     
     <!-- Modal: Drill-Down Inspector -->
-    <div id="modal-overlay" class="fixed inset-0 modal-bg items-center justify-center hidden z-50"><div id="modal-content" class="modal-content w-11/12 max-w-7xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col"><header class="p-4 border-b border-gray-700 flex justify-between items-center"><h2 id="modal-title" class="text-xl font-bold text-gray-300">Drill-Down Inspector</h2><button id="modal-close-btn" class="text-gray-400 hover:text-white text-4xl leading-none">&times;</button></header><div class="p-1 overflow-y-auto"><table class="w-full text-left"><thead class="sticky top-0 bg-gray-800"><tr class="border-b border-gray-700"><th class="p-3 text-base sortable" data-sort="mwn">MWN</th><th class="p-3 text-base sortable" data-sort="pdt">Product</th><th class="p-3 text-base sortable" data-sort="cl">Client</th><th class="p-3 text-base sortable" data-sort="STATUS">Status</th><th class="p-3 text-base sortable" data-sort="locality_name">Locality</th><th class="p-3 text-base sortable" data-sort="pincode">Pincode</th><th class="p-3 text-base sortable" data-sort="REMARKS">Remarks</th></tr></thead><tbody id="modal-table-body"></tbody></table></div></div></div>
+    <div id="modal-overlay" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div id="modal-content" class="modal-content w-11/12 max-w-7xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col">
+            <header class="p-4 border-b border-gray-700 flex justify-between items-center gap-4">
+                <h2 id="modal-title" class="text-xl font-bold text-gray-300">Drill-Down Inspector</h2>
+                <div class="flex items-center gap-4 ml-auto">
+                    <div id="modal-filters" class="filter-container !mb-0"></div>
+                    <div class="relative">
+                        <button id="download-btn" class="download-btn"><i data-lucide="download" class="h-4 w-4 mr-2"></i>Download</button>
+                        <div class="download-options">
+                            <a href="#" id="download-compact">Compact CSV</a>
+                            <a href="#" id="download-full">Full CSV</a>
+                        </div>
+                    </div>
+                </div>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-white text-4xl leading-none">&times;</button>
+            </header>
+            <div class="p-1 overflow-y-auto"><table class="w-full text-left"><thead class="sticky top-0 bg-gray-800"><tr class="border-b border-gray-700"><th class="p-3 text-base sortable" data-sort="mwn">MWN</th><th class="p-3 text-base sortable" data-sort="pdt">Product</th><th class="p-3 text-base sortable" data-sort="cl">Client</th><th class="p-3 text-base sortable" data-sort="STATUS">Status</th><th class="p-3 text-base sortable" data-sort="locality_name">Locality</th><th class="p-3 text-base sortable" data-sort="pincode">Pincode</th><th class="p-3 text-base sortable" data-sort="REMARKS">Remarks</th></tr></thead><tbody id="modal-table-body"></tbody></table></div>
+        </div>
+    </div>
 
     <script>
         // --- Embedded Leaflet.js v1.9.4 & Leaflet.heat v0.2.0 for Offline Use ---
@@ -245,9 +215,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     const DOM = {};
-    ['upload-screen', 'dashboard-screen', 'drop-zone', 'csv-file-input', 'loading-indicator', 'error-message', 'live-time', 'live-date', 'dashboard-subtitle', 'modal-overlay', 'modal-content', 'modal-title', 'modal-close-btn', 'modal-table-body', 'insight-deck', 'client-breakdown-table', 'locality-breakdown-table', 'map-container', 'status-spectrum-container', 'client-search', 'locality-search', 'action-button', 'client-filters', 'locality-filters', 'font-increase', 'font-decrease'].forEach(id => DOM[id] = document.getElementById(id));
+    ['upload-screen', 'dashboard-screen', 'drop-zone', 'csv-file-input', 'loading-indicator', 'error-message', 'live-time', 'live-date', 'dashboard-subtitle', 'modal-overlay', 'modal-content', 'modal-title', 'modal-close-btn', 'modal-table-body', 'insight-deck', 'client-breakdown-table', 'locality-breakdown-table', 'map-container', 'status-spectrum-container', 'client-search', 'locality-search', 'action-button', 'client-filters', 'locality-filters', 'font-increase', 'font-decrease', 'modal-filters', 'download-compact', 'download-full'].forEach(id => DOM[id] = document.getElementById(id));
     
-    let state = { fullData: [], map: null, currentModalData: [], sortState: {}, aggregatedClients: [], aggregatedLocalities: [], clientFilter: 'All', localityFilter: 'All', currentFontSize: 16 };
+    let state = { fullData: [], map: null, currentModalData: [], currentModalFilteredData: [], sortState: {}, aggregatedClients: [], aggregatedLocalities: [], clientFilter: 'All', localityFilter: 'All', currentFontSize: 16 };
     
     const setupEventListeners = () => {
         DOM['action-button'].addEventListener('click', () => DOM['csv-file-input'].click());
@@ -273,6 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM['locality-filters'].addEventListener('change', handleFilterChange);
         DOM['font-increase'].addEventListener('click', () => updateFontSize(1));
         DOM['font-decrease'].addEventListener('click', () => updateFontSize(-1));
+        DOM['modal-filters'].addEventListener('change', handleModalFilterChange);
+        DOM['download-compact'].addEventListener('click', (e) => { e.preventDefault(); downloadData(false); });
+        DOM['download-full'].addEventListener('click', (e) => { e.preventDefault(); downloadData(true); });
     };
 
     const handleFile = (file) => {
@@ -373,19 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelsHtml = sortedStatusData.map(([status, count]) => {
              const percentage = (count / total) * 100;
              if (percentage < 0.1) return '';
-             return `
-                <div class="spectrum-label-item" data-status="${status}">
-                    <div class="spectrum-label-title">${status}</div>
-                    <div class="spectrum-label-value">${count}</div>
-                </div>
-            `;
+             return `<div class="spectrum-label-item" data-status="${status}"><div class="spectrum-label-title">${status}</div><div class="spectrum-label-value">${count}</div></div>`;
         }).join('');
 
         const statusCount = sortedStatusData.filter(([_, count]) => (count / total * 100) >= 0.1).length;
-        DOM['status-spectrum-container'].innerHTML = `
-            <div class="status-spectrum-bar">${barHtml}</div>
-            <div class="spectrum-label-grid" style="--status-count: ${statusCount}">${labelsHtml}</div>
-        `;
+        DOM['status-spectrum-container'].innerHTML = `<div class="status-spectrum-bar">${barHtml}</div><div class="spectrum-label-grid" style="--status-count: ${statusCount}">${labelsHtml}</div>`;
     };
     
     function handleSpectrumClick(event) {
@@ -458,11 +423,65 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function showModal(data, title) {
-        state.currentModalData = data; state.sortState = {};
+        state.currentModalData = data;
+        state.currentModalFilteredData = data;
         DOM['modal-title'].textContent = `${title} (${data.length} shipments)`;
+        
+        const pdtTypes = ['All', ...new Set(data.map(item => item.pdt).filter(Boolean))];
+        DOM['modal-filters'].innerHTML = pdtTypes.map(pdt => `
+            <div>
+                <input type="radio" id="modal-filter-${pdt}" name="modal-pdt-filter" value="${pdt}" class="filter-checkbox" ${pdt === 'All' ? 'checked' : ''}>
+                <label for="modal-filter-${pdt}" class="filter-label">${pdt}</label>
+            </div>
+        `).join('');
+
         renderModalTable(data);
         DOM['modal-overlay'].classList.add('flex'); DOM['modal-overlay'].classList.remove('hidden');
+        lucide.createIcons();
     }
+
+    function handleModalFilterChange(event) {
+        const selectedPdt = event.target.value;
+        if (selectedPdt === 'All') {
+            state.currentModalFilteredData = state.currentModalData;
+        } else {
+            state.currentModalFilteredData = state.currentModalData.filter(item => item.pdt === selectedPdt);
+        }
+        renderModalTable(state.currentModalFilteredData);
+    }
+    
+    function downloadData(isFull) {
+        const dataToExport = state.currentModalFilteredData;
+        if (dataToExport.length === 0) return;
+
+        let csvData;
+        if (isFull) {
+            csvData = dataToExport;
+        } else {
+            csvData = dataToExport.map(row => ({
+                mwn: row.mwn,
+                pdt: row.pdt,
+                cl: row.cl,
+                STATUS: row.STATUS,
+                locality_name: row.locality_name,
+                pincode: row.pincode,
+                REMARKS: row.REMARKS,
+            }));
+        }
+
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        const timestamp = new Date().toISOString().slice(0,16).replace(/[-T:]/g, "");
+        link.setAttribute("download", `dispatch_sight_export_${timestamp}_${isFull ? 'full' : 'compact'}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     function closeModal() { DOM['modal-overlay'].classList.add('hidden'); DOM['modal-overlay'].classList.remove('flex'); }
 
     function renderModalTable(data) {
@@ -485,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const header = e.target.closest('.sortable'); if (!header) return;
         const key = header.dataset.sort; const currentDir = state.sortState[key];
         const newDir = currentDir === 'asc' ? 'desc' : 'asc'; state.sortState = { [key]: newDir };
-        const sortedData = [...state.currentModalData].sort((a,b)=>{const vA=a[key]?.toString().toLowerCase()||'',vB=b[key]?.toString().toLowerCase()||'';const comp=vA.localeCompare(vB,undefined,{numeric:true});return newDir==='asc'?comp:-comp;});
+        const sortedData = [...state.currentModalFilteredData].sort((a,b)=>{const vA=a[key]?.toString().toLowerCase()||'',vB=b[key]?.toString().toLowerCase()||'';const comp=vA.localeCompare(vB,undefined,{numeric:true});return newDir==='asc'?comp:-comp;});
         renderModalTable(sortedData);
     }
     
